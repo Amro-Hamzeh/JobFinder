@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:drawable/dialog_holo_light_frame"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/txt_filter1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/margin8"
+        android:textSize="@dimen/font_medium_plus"
+        android:text="@string/provider"/>
+
+    <TextView
+        android:id="@+id/txt_filter2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/margin8"
+        android:text="@string/title"
+        android:textSize="@dimen/font_medium_plus"/>
+
+    <TextView
+        android:id="@+id/txt_filter3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/margin8"
+        android:visibility="visible"
+        android:text="@string/location"
+        android:textSize="@dimen/font_medium_plus"/>
+</LinearLayout>

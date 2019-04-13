@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Job Finder</string>
+    <string name="loading">Loading.</string>
+    <string name="loading_wait">Loading job data, please wait.</string>
+    <string name="filter_by">Filter by</string>
+    <string name="search">Search…</string>
+    <string name="place_search">Click to pick a location</string>
+    <string name="both">Both</string>
+    <string name="provider">Provider</string>
+    <string name="title">Job Title</string>
+    <string name="location">Location</string>
+    <string name="github">Github jobs</string>
+    <string name="search_jobs">Search.gov jobs</string>
+</resources>
