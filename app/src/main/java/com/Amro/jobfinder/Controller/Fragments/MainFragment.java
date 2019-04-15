@@ -2,8 +2,11 @@ package com.Amro.jobfinder.Controller.Fragments;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -128,79 +131,106 @@ public class MainFragment extends BaseFragment implements View.OnClickListener, 
     private void getGitHubJobs() {
         mListItemList = new ArrayList<>();
         webServices = null;
-        webServices = RetrofitInstance.getRetrofitInstance(Constants.BASE_GITHUB_JOBS_URL).create(WebServices.class);
-        if (progressDialog == null) { //initialising and showing progress dialog while the data is loading.
-            progressDialog = new ProgressDialog(getContext());
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDialog.setTitle(getString(R.string.loading));
-            progressDialog.setMessage(getString(R.string.loading_wait));
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCanceledOnTouchOutside(true);
-        }
-        progressDialog.show();
-        Call<List<GitHubJobsResponse>> call = webServices.getGithubJobsData();
-        call.enqueue(new Callback<List<GitHubJobsResponse>>() {
-            @Override
-            public void onResponse(Call<List<GitHubJobsResponse>> call, Response<List<GitHubJobsResponse>> response) {
-                //handling on success response
-                if (response.body() != null) {
-                    mListItemList.addAll(response.body());
+        if(isConnected()) {
+            webServices = RetrofitInstance.getRetrofitInstance(Constants.BASE_GITHUB_JOBS_URL).create(WebServices.class);
+            if (progressDialog == null) { //initialising and showing progress dialog while the data is loading.
+                progressDialog = new ProgressDialog(getContext());
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setTitle(getString(R.string.loading));
+                progressDialog.setMessage(getString(R.string.loading_wait));
+                progressDialog.setIndeterminate(true);
+                progressDialog.setCanceledOnTouchOutside(true);
+            }
+            progressDialog.show();
+            Call<List<GitHubJobsResponse>> call = webServices.getGithubJobsData();
+            call.enqueue(new Callback<List<GitHubJobsResponse>>() {
+                @Override
+                public void onResponse(Call<List<GitHubJobsResponse>> call, Response<List<GitHubJobsResponse>> response) {
+                    //handling on success response
+                    if (response.body() != null) {
+                        mListItemList.addAll(response.body());
+                        mAdapter = new BaseRecyclerAdapter(mListItemList, MainFragment.this);
+                        mRecyclerView.setAdapter(mAdapter);
+                        getSearchJobsData();
+
+                    }
+                }
+
+                //failure of API request is handling here.
+                @Override
+                public void onFailure(Call<List<GitHubJobsResponse>> call, Throwable t) {
                     mAdapter = new BaseRecyclerAdapter(mListItemList, MainFragment.this);
                     mRecyclerView.setAdapter(mAdapter);
+                    Toast.makeText(getContext(), "Something went wrong...Error message: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     getSearchJobsData();
-
                 }
-            }
-
-            //failure of API request is handling here.
-            @Override
-            public void onFailure(Call<List<GitHubJobsResponse>> call, Throwable t) {
-                mAdapter = new BaseRecyclerAdapter(mListItemList, MainFragment.this);
-                mRecyclerView.setAdapter(mAdapter);
-                Toast.makeText(getContext(), "Something went wrong...Error message: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                getSearchJobsData();
-            }
-        });
+            });
+        }
+        else
+        {
+            Toast.makeText(getContext(), "Please make sure you're connected to the internet", Toast.LENGTH_SHORT).show();
+        }
 
 
     }
+
+
 
     /**
      * Method for calling and handling API response from the search.gov jobs API
      */
     private void getSearchJobsData() {
-        webServices = RetrofitInstance.getRetrofitInstance(Constants.BASE_SEARCH_JOBS_URL).create(WebServices.class);
-        Call<List<SearchJobsResponse>> call = webServices.getSearchJobsData();
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(getContext());
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDialog.setTitle(getString(R.string.loading));
-            progressDialog.setMessage(getString(R.string.loading_wait));
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCanceledOnTouchOutside(true);
-            progressDialog.show();
-        }
+        if(isConnected()) {
+            webServices = RetrofitInstance.getRetrofitInstance(Constants.BASE_SEARCH_JOBS_URL).create(WebServices.class);
+            Call<List<SearchJobsResponse>> call = webServices.getSearchJobsData();
+            if (progressDialog == null) {
+                progressDialog = new ProgressDialog(getContext());
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setTitle(getString(R.string.loading));
+                progressDialog.setMessage(getString(R.string.loading_wait));
+                progressDialog.setIndeterminate(true);
+                progressDialog.setCanceledOnTouchOutside(true);
+                progressDialog.show();
+            }
 
-        call.enqueue(new Callback<List<SearchJobsResponse>>() {
-            @Override
-            public void onResponse(Call<List<SearchJobsResponse>> call, Response<List<SearchJobsResponse>> response) {
-                progressDialog.dismiss();
-                if (response.body() != null) {
-                   mListItemList.addAll(response.body());
-                    mAdapter.notifyDataSetChanged();
+            call.enqueue(new Callback<List<SearchJobsResponse>>() {
+                @Override
+                public void onResponse(Call<List<SearchJobsResponse>> call, Response<List<SearchJobsResponse>> response) {
+                    progressDialog.dismiss();
+                    if (response.body() != null) {
+                        mListItemList.addAll(response.body());
+                        mAdapter.notifyDataSetChanged();
+                    }
                 }
-            }
 
 
-            @Override
-            public void onFailure(Call<List<SearchJobsResponse>> call, Throwable t) {
-                progressDialog.dismiss();
-                Toast.makeText(getContext(),
-                        "Something went wrong...Error message: " + t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                @Override
+                public void onFailure(Call<List<SearchJobsResponse>> call, Throwable t) {
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(),
+                            "Something went wrong...Error message: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
 
-            }
-        });
+                }
+            });
+        }
+        else
+        {
+            Toast.makeText(getContext(), "Please make sure you're connected to the internet", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Method for checking network connection
+     * @return if the user have an active connection to the internet or not.
+     */
+    private boolean isConnected() {
+        ConnectivityManager cm =
+                (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
     }
 
     /**
